@@ -14,11 +14,9 @@ sys.path.append(os.path.join(caffedir, 'python'))
 
 import caffe
 
-imagedir = os.path.join(root, 'output')
-
-def saveimage(a, title, fmt='png'):
+def saveimage(a, path, fmt='png'):
     a = np.uint8(np.clip(a, 0, 255))
-    name = os.path.join(imagedir, title + '.' + fmt)
+    name = path + '.' + fmt
     PIL.Image.fromarray(a).save(name, fmt)
     print name
 
