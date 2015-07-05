@@ -16,7 +16,7 @@ import caffe
 
 imagedir = os.path.join(root, 'output')
 
-def showarray(a, title, fmt='png'):
+def saveimage(a, title, fmt='png'):
     a = np.uint8(np.clip(a, 0, 255))
     name = os.path.join(imagedir, title + '.' + fmt)
     PIL.Image.fromarray(a).save(name, fmt)
@@ -92,7 +92,7 @@ def deepdream(net, base_img, end, iter_n=10, octave_n=4, octave_scale=1.4, clip=
             #if not clip: # adjust image contrast if clipping is disabled
             #    vis = vis*(255.0/np.percentile(vis, 99.98))
             #ename = '-'.join(end.split('/'))
-            #showarray(vis, '{}-{}-{}'.format(octave, i))
+            #saveimage(vis, '{}-{}-{}'.format(octave, i))
             #print octave, i, end, vis.shape
 
         # extract details produced on the current octave
@@ -120,4 +120,4 @@ if __name__ == "__main__":
     net = loadnet()
     frame = deepdream(net, img, args.layer)
 
-    showarray(frame, output)
+    saveimage(frame, output)
