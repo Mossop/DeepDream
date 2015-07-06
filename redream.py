@@ -12,6 +12,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Computer dreams')
     parser.add_argument('image', metavar='IMAGE',
                         help='the image to dream about')
+    parser.add_argument('--model', dest='model', default='bvlc_googlenet',
+                        help='the model to use')
     parser.add_argument('--layer', dest='layer', default=layer,
                         help='the layer to optimise')
     parser.add_argument('--scale', dest='scale', type=float, default=0.05,
@@ -24,7 +26,7 @@ if __name__ == "__main__":
 
     frame = np.float32(PIL.Image.open(args.image))
 
-    net = loadnet()
+    net = loadnet(args.model)
 
     h, w = frame.shape[:2]
     s = args.scale

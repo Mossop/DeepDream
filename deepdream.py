@@ -103,6 +103,8 @@ if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Computer dreams')
     parser.add_argument('image', metavar='IMAGE',
                         help='the image to dream about')
+    parser.add_argument('--model', dest='model', default='bvlc_googlenet',
+                        help='the model to use')
     parser.add_argument('--output', dest='output', default=None,
                         help='the filename to save the result as')
     parser.add_argument('--layer', dest='layer', default=layer,
@@ -115,7 +117,7 @@ if __name__ == "__main__":
         (name, extract) = os.path.splitext(args.image)
         output = name + '_' + '-'.join(args.layer.split('/'))
 
-    net = loadnet()
+    net = loadnet(args.model)
     frame = deepdream(net, img, args.layer)
 
     saveimage(frame, output)
