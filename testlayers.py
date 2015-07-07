@@ -3,7 +3,7 @@ import scipy.ndimage as nd
 import PIL.Image
 import os
 
-from deepdream import deepdream, loadnet, saveimage
+from deepdream import deepdream, loadnet, loadmodel, saveimage
 
 if __name__ == "__main__":
     import argparse
@@ -19,12 +19,18 @@ if __name__ == "__main__":
     image = np.float32(PIL.Image.open(args.image))
     (name, ext) = os.path.splitext(os.path.basename(args.image))
 
+    model = loadmodel(args.model)
     net = loadnet(args.model)
 
-    for layer in net._layer_names:
-        try:
-            print("Testing layer %s" % layer)
-            frame = deepdream(net, image, layer)
-            saveimage(frame, os.path.join(args.output, name + '_' + '-'.join(layer.split('/'))))
-        except:
-            print("Invalid layer name %s" % layer)
+    for layer in model.layer:
+        # Seem to be invalid somehow
+        if layer.type in ["Dropout", "ReLU"]:
+            continue
+        # Cause crashes
+        if layer.type in ["Softmax", "InnerProduct"]:
+            continue
+
+        if layer.type != "Pooling":
+            continue
+        frame = deepdream(net, image, layer.name)
+        saveimage(frame, os.path.join(args.output, name + '_' + '-'.join(layer.name.split('/'))))

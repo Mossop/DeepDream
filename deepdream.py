@@ -1,6 +1,7 @@
 import numpy as np
 import scipy.ndimage as nd
 import os, sys
+from tempfile import mkstemp
 import PIL.Image
 from google.protobuf import text_format
 
@@ -20,22 +21,34 @@ def saveimage(a, path, fmt='png'):
     PIL.Image.fromarray(a).save(name, fmt)
     print name
 
-def loadnet(model=model):
+def loadmodel(model=model):
     model_path = os.path.join(caffedir, 'models', model) # substitute your path here
     net_fn   = os.path.join(model_path, 'deploy.prototxt')
-    param_fn = os.path.join(model_path, model + '.caffemodel')
 
     # Patching model to be able to compute gradients.
     # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
     model = caffe.io.caffe_pb2.NetParameter()
     text_format.Merge(open(net_fn).read(), model)
-    model.force_backward = True
-    tmpfile = os.path.join(root, 'tmp/tmp.prototxt')
-    open(tmpfile, 'w').write(str(model))
+    return model
 
-    return caffe.Classifier(tmpfile, param_fn,
-                            mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
-                            channel_swap = (2,1,0)) # the reference model has channels in BGR order instead of RGB
+def loadnet(model=model):
+    model_path = os.path.join(caffedir, 'models', model) # substitute your path here
+    param_fn = os.path.join(model_path, model + '.caffemodel')
+
+    # Patching model to be able to compute gradients.
+    # Note that you can also manually add "force_backward: true" line to "deploy.prototxt".
+    model = loadmodel(model)
+    model.force_backward = True
+
+    (oshandle, path) = mkstemp()
+    os.fdopen(oshandle, 'w').write(str(model))
+
+    try:
+        return caffe.Classifier(path, param_fn,
+                                mean = np.float32([104.0, 116.0, 122.0]), # ImageNet mean, training set dependent
+                                channel_swap = (2,1,0)) # the reference model has channels in BGR order instead of RGB
+    finally:
+        os.unlink(path)
 
 # a couple of utility functions for converting to and from Caffe's input image layout
 def preprocess(net, img):
