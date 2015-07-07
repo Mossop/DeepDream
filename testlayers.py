@@ -16,14 +16,15 @@ if __name__ == "__main__":
                         help='the directory to output results to')
     args = parser.parse_args()
 
-    frame = np.float32(PIL.Image.open(args.image))
+    image = np.float32(PIL.Image.open(args.image))
     (name, ext) = os.path.splitext(os.path.basename(args.image))
 
     net = loadnet(args.model)
 
     for layer in net._layer_names:
         try:
-            frame = deepdream(net, frame, layer)
+            print("Testing layer %s" % layer)
+            frame = deepdream(net, image, layer)
             saveimage(frame, os.path.join(args.output, name + '_' + '-'.join(layer.split('/'))))
         except:
             print("Invalid layer name %s" % layer)
