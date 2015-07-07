@@ -30,7 +30,8 @@ if __name__ == "__main__":
         if layer.type in ["Softmax", "InnerProduct"]:
             continue
 
-        if layer.type != "Pooling":
+        if layer.type == "Pooling" and layer.pooling_param.pool == 1:
             continue
+
         frame = deepdream(net, image, layer.name)
         saveimage(frame, os.path.join(args.output, name + '_' + '-'.join(layer.name.split('/'))))
